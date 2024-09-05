@@ -9,6 +9,8 @@ public interface BookingServiceInter {
 
     Response findBookingByConfirmationCode(String confirmationCode);
 
+    Response getAllBookings();
+
     Response cancelBooking(Long bookingId);
 
 }

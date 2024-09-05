@@ -89,7 +89,7 @@ public class UserServiceImp implements UserServiceInter {
             List<UserDto> userDtoList = Utils.userListEntityToUserListDto(userList);
             response.setStatusCode(200);
             response.setMessage("Successfully");
-            response.setUserDtos(userDtoList);
+            response.setUserList(userDtoList);
         } catch (MyException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

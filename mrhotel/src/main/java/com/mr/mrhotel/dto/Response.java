@@ -3,7 +3,6 @@ package com.mr.mrhotel.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -19,7 +18,7 @@ public class Response {
     private UserDto user;
     private RoomDto room;
     private BookingDto booking;
-    private List<UserDto> userDtos;
-    private List<RoomDto> roomDtos;
-    private List<BookingDto> bookingDtos;
+    private List<UserDto> userList;
+    private List<RoomDto> roomList;
+    private List<BookingDto> bookingList;
 }

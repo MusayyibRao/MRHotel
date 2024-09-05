@@ -13,24 +13,24 @@ import java.nio.file.StandardCopyOption;
 @Component
 public class Helper {
 
+        public final String UPLOAD_DIR = "C:\\Users\\musar\\Downloads\\mrhotel\\mrhotel\\src\\main\\resources\\image\\";
+//    public final String UPLOAD_DIR = new ClassPathResource("/image").getFile().getAbsolutePath();
+//
+//    public Helper() throws IOException {
+//    }
 
-    public static final String UPLOAD_DIR;
-
-    static {
-        try {
-            UPLOAD_DIR = new ClassPathResource("/image").getFile().getAbsolutePath();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public Helper() throws IOException {
-    }
-
-    public static  boolean uploadFile(MultipartFile file) {
+    public boolean uploadFile(MultipartFile photo) {
         boolean f = false;
         try {
-            Files.copy(file.getInputStream(), Paths.get(UPLOAD_DIR + File.separator + file.getOriginalFilename()), StandardCopyOption.REPLACE_EXISTING);
+//            InputStream is = file.getInputStream();
+//            byte[] data = new byte[is.available()];
+//            is.read(data);
+//
+//            FileOutputStream fos = new FileOutputStream(UPLOAD_DIR + File.separator + file.getOriginalFilename());
+//            fos.write(data);
+//            fos.flush();
+//            fos.close();
+            Files.copy(photo.getInputStream(), Paths.get(UPLOAD_DIR + File.separator + photo.getOriginalFilename()), StandardCopyOption.REPLACE_EXISTING);
             f = true;
         } catch (Exception e) {
             e.printStackTrace();

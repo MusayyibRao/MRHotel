@@ -1,5 +1,6 @@
 package com.mr.mrhotel.service.impl;
 
+import com.mr.mrhotel.dto.BookingDto;
 import com.mr.mrhotel.dto.Response;
 import com.mr.mrhotel.entity.Booking;
 import com.mr.mrhotel.entity.Room;
@@ -11,11 +12,13 @@ import com.mr.mrhotel.repository.UserRepository;
 import com.mr.mrhotel.service.interf.BookingServiceInter;
 import com.mr.mrhotel.service.interf.RoomServiceInter;
 import com.mr.mrhotel.utils.Utils;
-import jdk.jshell.execution.Util;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class BookingServiceImp implements BookingServiceInter {
 
     @Autowired
@@ -48,24 +51,84 @@ public class BookingServiceImp implements BookingServiceInter {
             bookingRequest.setRoom(room);
             bookingRequest.setUser(user);
             String bookingConfirmationCode = Utils.generateRandomAlphaNumeric(10);
+            bookingRequest.setBookingConfirmationCode(bookingConfirmationCode);
+            bookingRepository.save(bookingRequest);
+            response.setStatusCode(200);
+            response.setMessage("Successfully");
+            response.setBookingConfirmationCode(bookingConfirmationCode);
         } catch (MyException e) {
-
+            response.setStatusCode(405);
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
-
+            response.setStatusCode(500);
+            response.setMessage("Error Occurred" + e.getMessage());
         }
 
-        return null;
+        return response;
     }
 
 
     @Override
     public Response findBookingByConfirmationCode(String confirmationCode) {
-        return null;
+        Response response = new Response();
+
+        try {
+            Booking booking = bookingRepository.findByBookingConfirmationCode(confirmationCode).orElseThrow(() -> new MyException("Booking Not Found"));
+            BookingDto bookingDto = Utils.mapBookingentityToBookingDto(booking);
+            response.setStatusCode(200);
+            response.setMessage("Successfully");
+            response.setBooking(bookingDto);
+        } catch (MyException e) {
+            response.setStatusCode(405);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error Occurred" + e.getMessage());
+        }
+
+        return response;
     }
 
     @Override
+    public Response getAllBookings() {
+        Response response = new Response();
+
+        try {
+            List<Booking> bookingList = bookingRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+            List<BookingDto> bookingDtoList = Utils.bookingListEntityToBookingListDto(bookingList);
+            response.setStatusCode(200);
+            response.setMessage("Successfully");
+            response.setBookingList(bookingDtoList);
+        } catch (MyException e) {
+            response.setStatusCode(405);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error Occurred" + e.getMessage());
+        }
+
+        return response;
+    }
+
+
+    @Override
     public Response cancelBooking(Long bookingId) {
-        return null;
+        Response response = new Response();
+
+        try {
+            bookingRepository.findById(bookingId).orElseThrow(() -> new MyException("Booking does not exists"));
+            bookingRepository.deleteById(bookingId);
+            response.setStatusCode(200);
+            response.setMessage("Successfully");
+        } catch (MyException e) {
+            response.setStatusCode(405);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error Occurred" + e.getMessage());
+        }
+
+        return response;
     }
 
     private boolean roomIsAvailable(Booking bookingRequest, List<Booking> existingBooking) {

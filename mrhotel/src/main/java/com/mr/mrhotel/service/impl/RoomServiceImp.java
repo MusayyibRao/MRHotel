@@ -7,16 +7,18 @@ import com.mr.mrhotel.exception.MyException;
 import com.mr.mrhotel.repository.BookingRepository;
 import com.mr.mrhotel.repository.RoomRepository;
 import com.mr.mrhotel.service.interf.RoomServiceInter;
-import com.mr.mrhotel.utils.FileUpload;
+import com.mr.mrhotel.utils.Helper;
 import com.mr.mrhotel.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+@Service
 public class RoomServiceImp implements RoomServiceInter {
 
     @Autowired
@@ -25,14 +27,20 @@ public class RoomServiceImp implements RoomServiceInter {
     @Autowired
     BookingRepository bookingRepository;
 
+    @Autowired
+    Helper helper;
+
     @Override
     public Response addNewRoom(MultipartFile photo, String roomType, BigDecimal roomPrice, String description) {
 
         Response response = new Response();
         try {
             Room room = new Room();
-            String photoUrl = String.valueOf(FileUpload.fileUpload(photo));
-            room.setPhotoUrl(photoUrl);
+            boolean  f= helper.uploadFile(photo);
+            if(f) {
+                String UPLOAD_DIR = helper.UPLOAD_DIR+photo.getOriginalFilename();
+                room.setPhotoUrl(UPLOAD_DIR);
+            }
             room.setRoomType(roomType);
             room.setRoomPrice(roomPrice);
             room.setRoomDescription(description);
@@ -64,7 +72,7 @@ public class RoomServiceImp implements RoomServiceInter {
             List<RoomDto> roomDtoList = Utils.roomListEntityToRoomListDto(roomList);
             response.setStatusCode(200);
             response.setMessage("successfully");
-            response.setRoomDtos(roomDtoList);
+            response.setRoomList(roomDtoList);
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error Occurred" + e.getMessage());
@@ -80,7 +88,7 @@ public class RoomServiceImp implements RoomServiceInter {
             roomRepository.findById(roomId).orElseThrow(() -> new MyException("Room Not Found"));
             roomRepository.deleteById(roomId);
             response.setStatusCode(200);
-            response.setMessage("successfully");
+            response.setMessage("Data Delete Successfully");
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error Occurred" + e.getMessage());
@@ -94,7 +102,11 @@ public class RoomServiceImp implements RoomServiceInter {
         try {
             String imageUrl = null;
             if (photo != null && !photo.isEmpty()) {
-                imageUrl = String.valueOf(FileUpload.fileUpload(photo));
+                boolean  f= helper.uploadFile(photo);
+                if(f) {
+                    String UPLOAD_DIR =helper.UPLOAD_DIR+photo.getOriginalFilename();
+                    imageUrl=UPLOAD_DIR;
+                }
             }
             Room room = roomRepository.findById(roomId).orElseThrow(() -> new MyException("Room Not Found"));
             if (roomType != null) room.setRoomType(roomType);
@@ -137,7 +149,7 @@ public class RoomServiceImp implements RoomServiceInter {
             List<RoomDto> roomDtoList = Utils.roomListEntityToRoomListDto(availableRoom);
             response.setStatusCode(200);
             response.setMessage("successfully");
-            response.setRoomDtos(roomDtoList);
+            response.setRoomList(roomDtoList);
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error Occurred" + e.getMessage());
@@ -153,7 +165,7 @@ public class RoomServiceImp implements RoomServiceInter {
             List<RoomDto> roomDtoList = Utils.roomListEntityToRoomListDto(roomList);
             response.setStatusCode(200);
             response.setMessage("successfully");
-            response.setRoomDtos(roomDtoList);
+            response.setRoomList(roomDtoList);
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error Occurred" + e.getMessage());
