@@ -74,7 +74,7 @@ public class BookingServiceImp implements BookingServiceInter {
 
         try {
             Booking booking = bookingRepository.findByBookingConfirmationCode(confirmationCode).orElseThrow(() -> new MyException("Booking Not Found"));
-            BookingDto bookingDto = Utils.mapBookingentityToBookingDto(booking);
+            BookingDto bookingDto = Utils.mapBookingEntityBookingDtoPlusBookingRoom(booking,true);
             response.setStatusCode(200);
             response.setMessage("Successfully");
             response.setBooking(bookingDto);

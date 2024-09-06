@@ -20,7 +20,7 @@ public class BookingController {
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<Response> saveBooking(@PathVariable Long roomId,
                                                 @PathVariable Long userId,
-                                                @PathVariable Booking bookingRequest) {
+                                                @RequestBody Booking bookingRequest) {
         Response response = bookingServiceInter.saveBooking(roomId, userId, bookingRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
 
@@ -44,7 +44,7 @@ public class BookingController {
 
     @GetMapping("cancel/{bookingId}")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
-    public ResponseEntity<Response> cancel(@PathVariable Long bookingId) {
+    public ResponseEntity<Response> cancelBooking(@PathVariable Long bookingId) {
         Response response = bookingServiceInter.cancelBooking(bookingId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
