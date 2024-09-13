@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/bookings")
-//@CrossOrigin(origins = "http://localhost:3000")
 public class BookingController {
 
 
@@ -36,14 +35,14 @@ public class BookingController {
 
 
     @GetMapping("/get_by_confirmation_code/{confirmationCode}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<Response> getBookingByConfirmationCode(@PathVariable String confirmationCode) {
         Response response = bookingServiceInter.findBookingByConfirmationCode(confirmationCode);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
 
-    @GetMapping("cancel/{bookingId}")
+    @DeleteMapping("cancel/{bookingId}")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<Response> cancelBooking(@PathVariable Long bookingId) {
         Response response = bookingServiceInter.cancelBooking(bookingId);

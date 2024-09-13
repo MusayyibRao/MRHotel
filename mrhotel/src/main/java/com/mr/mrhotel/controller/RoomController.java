@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/rooms")
-//@CrossOrigin(origins = "http://localhost:3000")
 public class RoomController {
 
 
