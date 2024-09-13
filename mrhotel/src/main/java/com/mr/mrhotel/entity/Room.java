@@ -2,10 +2,10 @@ package com.mr.mrhotel.entity;
 
 
 import jakarta.persistence.*;
-import jakarta.persistence.criteria.Fetch;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +20,8 @@ public class Room {
 
     private String roomType;
     private BigDecimal roomPrice;
-    private String photoUrl;
+    @Lob
+    private Blob photo;
     private String roomDescription;
     @OneToMany(mappedBy = "room",fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     private List<Booking> bookings = new ArrayList<>();
@@ -31,7 +32,7 @@ public class Room {
                 "id=" + id +
                 ", roomType='" + roomType + '\'' +
                 ", roomPrice=" + roomPrice +
-                ", photoUrl='" + photoUrl + '\'' +
+                ", photoUrl='" + photo + '\'' +
                 ", roomDescription='" + roomDescription + '\'' +
                 '}';
     }

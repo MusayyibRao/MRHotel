@@ -14,7 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.sql.rowset.serial.SerialBlob;
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -36,11 +38,17 @@ public class RoomServiceImp implements RoomServiceInter {
         Response response = new Response();
         try {
             Room room = new Room();
-            boolean  f= helper.uploadFile(photo);
-            if(f) {
-                String UPLOAD_DIR = helper.UPLOAD_DIR+photo.getOriginalFilename();
-                room.setPhotoUrl(UPLOAD_DIR);
+//            boolean  f= helper.uploadFile(photo);
+//            if(f) {
+//                String UPLOAD_DIR = helper.UPLOAD_DIR+photo.getOriginalFilename();
+//                room.setPhotoUrl(UPLOAD_DIR);
+//            }
+            if(!photo.isEmpty()){
+                byte[] photoBytes= photo.getBytes();
+                Blob photoBlob = new SerialBlob(photoBytes);
+                room.setPhoto(photoBlob);
             }
+
             room.setRoomType(roomType);
             room.setRoomPrice(roomPrice);
             room.setRoomDescription(description);
@@ -112,7 +120,12 @@ public class RoomServiceImp implements RoomServiceInter {
             if (roomType != null) room.setRoomType(roomType);
             if (roomPrice != null) room.setRoomPrice(roomPrice);
             if (description != null) room.setRoomDescription(description);
-            if (photo != null) room.setPhotoUrl(imageUrl);
+//            if (photo != null) room.setPhoto(imageUrl);
+            if(!photo.isEmpty()){
+                byte[] photoBytes= photo.getBytes();
+                Blob photoBlob = new SerialBlob(photoBytes);
+                room.setPhoto(photoBlob);
+            }
             Room updateroom = roomRepository.save(room);
             RoomDto roomDto = Utils.roomEntityToRoomDto(updateroom);
             response.setStatusCode(200);

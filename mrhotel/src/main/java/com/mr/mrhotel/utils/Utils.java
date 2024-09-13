@@ -6,8 +6,12 @@ import com.mr.mrhotel.dto.UserDto;
 import com.mr.mrhotel.entity.Booking;
 import com.mr.mrhotel.entity.Room;
 import com.mr.mrhotel.entity.User;
+import org.apache.commons.codec.binary.Base64;
 
 import java.security.SecureRandom;
+import java.sql.Blob;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,24 +44,27 @@ public class Utils {
 
     }
 
-    public static RoomDto roomEntityToRoomDto(Room room) {
+    public static RoomDto roomEntityToRoomDto(Room room) throws SQLException {
 
         RoomDto roomDto = new RoomDto();
         roomDto.setId(room.getId());
         roomDto.setRoomType(room.getRoomType());
         roomDto.setRoomPrice(room.getRoomPrice());
         roomDto.setRoomDescription(room.getRoomDescription());
-        roomDto.setPhotoUrl(room.getPhotoUrl());
+        String photoString = photoConvert(room.getPhoto());
+        roomDto.setPhoto(photoString);
         return roomDto;
     }
 
-    public static RoomDto roomEntityToRoomDtoPlusBooking(Room room) {
+    public static RoomDto roomEntityToRoomDtoPlusBooking(Room room) throws SQLException {
 
         RoomDto roomDto = new RoomDto();
         roomDto.setId(room.getId());
         roomDto.setRoomType(room.getRoomType());
         roomDto.setRoomPrice(room.getRoomPrice());
-        roomDto.setPhotoUrl(room.getPhotoUrl());
+        String photoString= photoConvert(room.getPhoto());
+        roomDto.setPhoto(photoString);
+
 //        roomDto.setRoomDescription(room.getRoomDescription());
 
         if (room.getBookings() != null) {
@@ -89,12 +96,18 @@ public class Utils {
         userDto.setPhoneNo(user.getPhoneNo());
         userDto.setRole(user.getRole());
         if (!user.getBooking().isEmpty()) {
-            userDto.setBookings(user.getBooking().stream().map(booking -> mapBookingEntityBookingDtoPlusBookingRoom(booking, false)).collect(Collectors.toList()));
+            userDto.setBookings(user.getBooking().stream().map(booking -> {
+                try {
+                    return mapBookingEntityBookingDtoPlusBookingRoom(booking, false);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList()));
         }
         return userDto;
     }
 
-    public static BookingDto mapBookingEntityBookingDtoPlusBookingRoom(Booking booking, boolean mapUser) {
+    public static BookingDto mapBookingEntityBookingDtoPlusBookingRoom(Booking booking, boolean mapUser) throws SQLException {
 
         BookingDto bookingDto = new BookingDto();
 
@@ -116,8 +129,9 @@ public class Utils {
             roomDto.setRoomType(booking.getRoom().getRoomType());
             roomDto.setRoomPrice(booking.getRoom().getRoomPrice());
             roomDto.setRoomDescription(booking.getRoom().getRoomDescription());
-            roomDto.setPhotoUrl(booking.getRoom().getPhotoUrl());
-            bookingDto.setRoom(roomDto);
+               String photoString = photoConvert(booking.getRoom().getPhoto());
+                    roomDto.setPhoto(photoString);
+                     bookingDto.setRoom(roomDto);
         }
 
         return bookingDto;
@@ -127,14 +141,32 @@ public class Utils {
         return userList.stream().map(Utils::userEntityToUserDto).collect(Collectors.toList());
     }
 
-    public static List<RoomDto> roomListEntityToRoomListDto(List<Room> roomList) {
+    public static List<RoomDto> roomListEntityToRoomListDto(List<Room> roomList) throws SQLException {
 
-        return roomList.stream().map(Utils::roomEntityToRoomDto).collect(Collectors.toList());
+        List<RoomDto> list = new ArrayList<>();
+        for (Room room : roomList) {
+            RoomDto roomDto = roomEntityToRoomDto(room);
+            list.add(roomDto);
+        }
+        return list;
     }
 
     public static List<BookingDto> bookingListEntityToBookingListDto(List<Booking> bookingList) {
 
         return bookingList.stream().map(Utils::mapBookingentityToBookingDto).collect(Collectors.toList());
+    }
+
+
+    public static String photoConvert(Blob photo) throws SQLException {
+
+        if(photo !=null) {
+            byte[] photoByte = photo.getBytes(1,(int)photo.length());
+            if(photoByte !=null && photoByte.length>0) {
+                String base64Photo = Base64.encodeBase64String(photoByte);
+              return base64Photo;
+            }
+        }
+        return null;
     }
 
 
